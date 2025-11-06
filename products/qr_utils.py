@@ -9,6 +9,7 @@ from pyzbar.pyzbar import decode
 import requests
 from io import BytesIO
 
+
 def extract_qr_data_from_image(name):
     #url =  f"https://esschertdesign-prod.s3.eu-west-1.amazonaws.com/qrcodes/{name}.png?mtime=0"
     url =  f"{os.getenv("AWS_URL")}{name}.png?mtime=0"

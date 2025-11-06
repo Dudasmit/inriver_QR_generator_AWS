@@ -15,6 +15,15 @@ from rest_framework.permissions import IsAuthenticated
 import base64
 from drf_yasg import openapi
 from django.views.decorators.csrf import csrf_exempt
+import boto3
+
+
+BUCKET_NAME = os.getenv("BUCKET_NAME")
+S3_FOLDER = os.getenv("S3_FOLDER")
+
+s3 = boto3.client("s3")
+
+
 
 token_param = openapi.Parameter(
     name='Authorization',
@@ -74,7 +83,7 @@ def generate_qr_api(request):
 
     for product in products:
         url = f"https://{domain}/01/"
-        success = create_and_save_qr_code_eps(url, product.name, product.barcode, include_barcode, folder)
+        success = create_and_save_qr_code_eps(s3,url, product.name, product.barcode, include_barcode, folder)
 
         if success:
             success_count += 1
