@@ -40,7 +40,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800
 
 
-ALLOWED_HOSTS = ['*','51.20.78.106:8000', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
+ALLOWED_HOSTS = ['*','51.20.78.106', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
                  "inriverqr-63c10a36ae10.herokuapp.com"
                  
                  ]
