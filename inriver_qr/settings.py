@@ -33,11 +33,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu
 DEBUG = True#bool(os.environ.get('DJANGO_DEBUG',  False))
 
 
-#CSRF_COOKIE_HTTPONLY = True
-#CSRF_COOKIE_SECURE = True
-#SESSION_COOKIE_SAMESITE = 'Lax'
-#SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-#SESSION_COOKIE_AGE = 1800
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 1800
 
 
 ALLOWED_HOSTS = ['*','51.20.78.106', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
@@ -58,6 +58,8 @@ CSRF_TRUSTED_ORIGINS = ['http://.*',
                         'http://0.0.0.0:8000',
                         'http://34.171.209.171',
                         'http://51.20.78.106',
+                        'https://51.20.78.106',
+                        
                         ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
