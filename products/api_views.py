@@ -14,6 +14,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 import base64
 from drf_yasg import openapi
+from django.views.decorators.csrf import csrf_exempt
 
 token_param = openapi.Parameter(
     name='Authorization',
@@ -32,7 +33,7 @@ class MyEndpoint(APIView):
 
     
 
-
+@csrf_exempt
 @swagger_auto_schema(
     manual_parameters=[token_param],
     method='post',
@@ -40,6 +41,8 @@ class MyEndpoint(APIView):
     operation_description="Генерация QR-кодов для выбранных продуктов",
     responses={200: "Успешно", 400: "Ошибка запроса"}
 )
+
+@csrf_exempt
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def generate_qr_api(request):

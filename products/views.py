@@ -215,6 +215,8 @@ def delete_all_qr(request):
     
     return redirect('product_list')  # Возврат на главную
 
+
+@csrf_exempt
 def generate_qr(request):
     
     if request.method == 'POST':
@@ -244,7 +246,7 @@ def generate_qr(request):
 
     return HttpResponse("Метод не поддерживается", status=405)
 
-
+@csrf_exempt
 def generate_qr_background(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('products')
@@ -292,7 +294,7 @@ def generate_qr_background(request):
 
 
 
-
+@csrf_exempt
 def generate_qr_old(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('products')
