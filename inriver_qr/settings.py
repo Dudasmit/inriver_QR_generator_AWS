@@ -40,12 +40,14 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800
 
 
-ALLOWED_HOSTS = ['*', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
+ALLOWED_HOSTS = ['*','51.20.78.106:8000', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
                  "inriverqr-63c10a36ae10.herokuapp.com"
                  
                  ]
 
 CSRF_TRUSTED_ORIGINS = ['http://.*', 
+                        'https://.*'
+                        
                         "https://inriverqr-b25af9f256f9.herokuapp.com",
                         "https://inriverqr-63c10a36ae10.herokuapp.com/",
                         
@@ -55,7 +57,7 @@ CSRF_TRUSTED_ORIGINS = ['http://.*',
                         'http://127.0.0.1:8000',
                         'http://0.0.0.0:8000',
                         'http://34.171.209.171',
-                        'http://34.28.93.1',
+                        'http://51.20.78.106:8000',
                         ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
