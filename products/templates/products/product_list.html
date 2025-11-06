@@ -49,6 +49,7 @@
 
 <form method="get" class="filter-form" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
   {% for field in filter.form %}
+   {% csrf_token %}
     <div style="display: flex; align-items: center;">
       <label class="filter-label" for="{{ field.id_for_label }}" style="margin-right: 4px;">{{ field.label }}:</label>
       {{ field|add_class:"filter-input" }}
@@ -61,6 +62,7 @@
   <input type="hidden" name="without_qr" value="{% if not show_without_qr %}1{% else %}0{% endif %}">
   <button type="submit" name="toggle_qr_filter" value="1" class="button">
     {% if not show_without_qr %}
+     {% csrf_token %}
       🔍 Show products without QR codes
     {% else %}
       🔄 Show all products
@@ -186,6 +188,7 @@
       </td>
     <td>
       {% if product.qr_code_url %}
+       {% csrf_token %}
       <a href="{{ product.qr_image_url }}" target="_blank">
       <img src="{{ product.qr_code_url }}" alt="barcode" width="100" />
       </a>
@@ -213,7 +216,9 @@
    
     <td>
     {% if product.qr_code_url %}
+     
       <a href="{% url 'download_qr' product.id %}" class="btn btn-sm btn-success">
+        {% csrf_token %}
         📥 Download QR
       </a>
     {% else %}
