@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu
 #SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get('DJANGO_DEBUG',  False))
+DEBUG = True#bool(os.environ.get('DJANGO_DEBUG',  False))
 
 
 #CSRF_COOKIE_HTTPONLY = True
