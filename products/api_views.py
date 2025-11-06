@@ -28,7 +28,7 @@ token_param = openapi.Parameter(
 
 class MyEndpoint(APIView):
     def get(self, request):
-        return Response({"message": "Привет из API!"})
+        return Response({"message": "Hello from the API!"})
 
 
     
@@ -38,8 +38,8 @@ class MyEndpoint(APIView):
     manual_parameters=[token_param],
     method='post',
     request_body=GenerateQRInputSerializer,
-    operation_description="Генерация QR-кодов для выбранных продуктов",
-    responses={200: "Успешно", 400: "Ошибка запроса"}
+    operation_description="Generating QR codes for selected products",
+    responses={200: "Successfully", 400: "Request error"}
 )
 
 @csrf_exempt
@@ -94,7 +94,7 @@ def generate_qr_api(request):
                 generated_files.append({
                     "product": product.name,
                     "filename": filename,
-                    "error": f"Не удалось прочитать PNG-файл: {str(e)}"
+                    "error": f"Unable to read PNG file: {str(e)}"
                 })
 
     return Response({
