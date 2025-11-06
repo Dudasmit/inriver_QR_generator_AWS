@@ -57,7 +57,7 @@ CSRF_TRUSTED_ORIGINS = ['http://.*',
                         'http://127.0.0.1:8000',
                         'http://0.0.0.0:8000',
                         'http://34.171.209.171',
-                        'http://51.20.78.106:8000',
+                        'http://51.20.78.106',
                         ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
