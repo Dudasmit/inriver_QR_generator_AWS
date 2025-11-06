@@ -10,7 +10,7 @@ schema_view = get_schema_view(
    openapi.Info(
       title="Product QR API",
       default_version='v1',
-      description="API для генерации QR-кодов товаров",
+      description="API for generating QR codes for products",
       contact=openapi.Contact(email="support@example.com"),
    ),
    public=True,
