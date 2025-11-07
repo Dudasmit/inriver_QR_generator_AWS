@@ -17,5 +17,5 @@ schema_view = get_schema_view(
    permission_classes=[permissions.AllowAny],
    authentication_classes=(TokenAuthentication,),
 
-   #url='https://inriverqr-63c10a36ae10.herokuapp.com/',
+   url='https://tikhonovskyi.com/',
 )

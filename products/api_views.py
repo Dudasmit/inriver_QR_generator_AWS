@@ -82,7 +82,7 @@ def generate_qr_api(request):
     generated_files = []
 
     for product in products:
-        url = f"https://{domain}/01/"
+        url = f"https://{domain}/01/0"
         success = create_and_save_qr_code_eps(s3,url, product.name, product.barcode, include_barcode, folder)
 
         if success:

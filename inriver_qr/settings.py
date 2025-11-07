@@ -40,23 +40,14 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800
 
 
-ALLOWED_HOSTS = ['*','51.20.78.106', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1',
-                 "inriverqr-63c10a36ae10.herokuapp.com"
-                 
-                 ]
+ALLOWED_HOSTS = ['*','51.20.78.106','tikhonovskyi.com','www.tikhonovskyi.com', '127.0.0.1', ]
 
 CSRF_TRUSTED_ORIGINS = ['http://.*', 
-                        'https://.*'
-                        
-                        "https://inriverqr-b25af9f256f9.herokuapp.com",
-                        "https://inriverqr-63c10a36ae10.herokuapp.com/",
-                        
-                        'https://agenda.sepkoeriers.nl',
-                        'http://agenda.sepkoeriers.nl',
-                        'https://agenda.sepkoeriers.nl/accounts/profile/',
-                        'http://127.0.0.1:8000',
+                        'https://.*',
+'https://tikhonovskyi.com',
+
+                        'https://tikhonovskyi.com/',
                         'http://0.0.0.0:8000',
-                        'http://34.171.209.171',
                         'http://51.20.78.106',
                         'https://51.20.78.106',
                         
