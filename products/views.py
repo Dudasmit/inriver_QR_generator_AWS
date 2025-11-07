@@ -26,7 +26,6 @@ from rest_framework.decorators import api_view, permission_classes
 import uuid
 from .models import QRTaskStatus
 
-from .tasks import generate_qr_background_task, generate_qr_background_task_
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -54,63 +53,6 @@ def custom_logout(request):
 
 
 
-def product_list_old(request):
-    
-    product_filter = ProductFilter(request.GET, queryset=Product.objects.all().order_by('-name'))
-    
-
-    # Пагинация
-    paginator = Paginator(product_filter.qs, 20)  # 20 товаров на страницу
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
-    has_qr_codes = any(os.scandir(qr_dir)) if os.path.exists(qr_dir) else False
-    
-
-    return render(request, 'products/product_list.html', {
-        'filter': product_filter,
-        'page_obj': page_obj,
-        'qr_files': {},  # заглушка
-        'show_download_all': False,
-        'has_qr_codes': has_qr_codes,
-    })
-
-
-def qr_progress_view(request, task_id):
-    return render(request, 'products/qr_progress.html', {'task_id': task_id})
-
-def product_list_filter(request):    
-    show_without_qr = request.GET.get("without_qr") == "1"
-    base_qs = Product.objects.all().order_by('-name')
-
-    if show_without_qr:
-        # Получаем ID товаров без QR
-        ids_without_qr = []
-        for product in base_qs:
-            qr_path = os.path.join(settings.MEDIA_ROOT, 'qrcodes',  f"{product.name}.png")
-            if not os.path.exists(qr_path):
-                ids_without_qr.append(product.id)
-
-        base_qs = base_qs.filter(id__in=ids_without_qr)  # ✅ это снова QuerySet
-
-    product_filter = ProductFilter(request.GET, queryset=base_qs)
-
-    paginator = Paginator(product_filter.qs, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
-    has_qr_codes = any(os.scandir(qr_dir)) if os.path.exists(qr_dir) else False
-
-    return render(request, 'products/product_list.html', {
-        'filter': product_filter,
-        'page_obj': page_obj,
-        'qr_files': {},
-        'show_download_all': False,
-        'has_qr_codes': has_qr_codes,
-        'show_without_qr': show_without_qr,
-    })
 @login_required(login_url='login')
 def product_list(request):
     if not request.user.is_authenticated:
@@ -216,82 +158,6 @@ def delete_all_qr(request):
     return redirect('product_list')  # Возврат на главную
 
 
-@csrf_exempt
-def generate_qr(request):
-    
-    if request.method == 'POST':
-        selected_ids = request.POST.getlist('products')
-        select_all = request.POST.get("select_all") == "1"
-        include_barcode = 'include_barcode' in request.POST
-        domain = request.POST.get('domain')
-
-        if select_all:
-            product_filter = ProductFilter(
-                request.session.get("last_filter", {}), queryset=Product.objects.all()
-            )
-            products = product_filter.qs
-        else:
-            products = Product.objects.filter(id__in=selected_ids)
-
-        product_ids = list(products.values_list('id', flat=True))
-        if not product_ids:
-            return render(request, 'products/generate_qr.html', {'returntolist': True})
-
-        task_id = str(uuid.uuid4())
-        QRTaskStatus.objects.create(task_id=task_id)
-        
-        generate_qr_background_task(product_ids, domain, include_barcode, task_id)
-
-        return redirect(f'/qr-progress/{task_id}/')
-
-    return HttpResponse("Метод не поддерживается", status=405)
-
-@csrf_exempt
-def generate_qr_background(request):
-    if request.method == 'POST':
-        selected_ids = request.POST.getlist('products')
-        
-        select_all = request.POST.get("select_all") == "1"
-        
-        
-        include_barcode = 'include_barcode' in request.POST
-        domain = request.POST.get('domain')
-        
-        print(domain)
-
-        if not selected_ids:
-            return render(request, 'products/generate_qr.html', {'returntolist': True})
-            
-        if select_all:
-            # Выбрать ВСЕ товары с учётом фильтра (не только текущую страницу)
-            product_filter = ProductFilter(request.session.get("last_filter", {}), queryset=Product.objects.all())
-            products = product_filter.qs
-        else:
-            products = Product.objects.filter(id__in=selected_ids)
-            
-        qr_root = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
-        os.makedirs(qr_root, exist_ok=True)
-        
-        task_id = str(uuid.uuid4())
-        
-        product_ids = list(products.values_list('id', flat=True))
-        QRTaskStatus.objects.create(task_id=task_id, done=False, total=len(product_ids), processed=0)
-     
-        
-        for i, product_id in enumerate(product_ids):
-           
-
-            
-            
-            generate_qr_background_task_(product_id, domain, task_id)
-                
-                
-                
-        
-        return redirect(f'/qr-progress/{task_id}/')
-
-    return HttpResponse("Метод не поддерживается", status=405)
-
 
 
 @csrf_exempt
@@ -367,7 +233,6 @@ def generate_qr_old(request):
     return HttpResponse("Метод не поддерживается", status=405)
 
 
-def download_qr_zip_local(request, product_id):
     
     product = get_object_or_404(Product, id=product_id)
     base_path = f'media/qrcodes/'
@@ -478,7 +343,6 @@ def download_all_qr(request):
     return response
 
 
-def download_all_qr_local(request):
     
     zip_buffer = BytesIO()
     with ZipFile(zip_buffer, 'w') as zipf:
@@ -620,16 +484,3 @@ def barcode_image_view(request, name):
 
 
 
-def qr_progress_status(request, task_id):
-    
-    
-    
-    try:
-        task = QRTaskStatus.objects.get(task_id=task_id)
-        return JsonResponse({
-            'done': task.done,
-            'total': task.total,
-            'processed': task.processed
-        })
-    except QRTaskStatus.DoesNotExist:
-        return JsonResponse({'error': 'Not found'}, status=404)
