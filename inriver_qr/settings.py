@@ -28,6 +28,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag')
 BASE_API_URL = os.getenv("BASE_API_URL", None)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv('DJANGO_DEBUG',  False))
 SECURE_SSL_REDIRECT =  os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
@@ -160,19 +161,23 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'Duda3107#_',
+        'PASSWORD': '###',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 '''
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
+DATABASE_HOST = os.getenv("DATABASE_HOST") 
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'PostgressDB#_&',
-        'HOST': 'databaseinstance.c5yyu8s487vn.eu-north-1.rds.amazonaws.com',
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
         'PORT': '5432',
     }
 }

@@ -19,8 +19,6 @@ class Product(models.Model):
     product_image_url = models.URLField(blank=True, null=True)
     
     
-   
-
 
 
     def __str__(self):
