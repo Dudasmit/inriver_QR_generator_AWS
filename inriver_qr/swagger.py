@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.authentication import TokenAuthentication
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from django.conf import settings
 
 schema_view = get_schema_view(
    
@@ -17,5 +17,5 @@ schema_view = get_schema_view(
    permission_classes=[permissions.AllowAny],
    authentication_classes=(TokenAuthentication,),
 
-   url='https://tikhonovskyi.com/',
+   url= settings.BASE_API_URL,
 )

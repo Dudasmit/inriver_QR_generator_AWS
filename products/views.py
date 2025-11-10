@@ -66,12 +66,9 @@ def product_list(request):
     
     
     if show_without_qr:
-        qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
-        existing_qr_files = set()
-        if os.path.exists(qr_dir):
-            existing_qr_files = {os.path.splitext(f.name)[0] for f in os.scandir(qr_dir) if f.name.endswith('.png')}
-        
-        queryset = queryset.exclude(name__in=existing_qr_files)
+        queryset = queryset.filter(qr_image_url__isnull= True)
+
+    
     # Применение фильтров
     product_filter = ProductFilter(request.GET, queryset=queryset)
 
@@ -81,16 +78,7 @@ def product_list(request):
     page_obj = paginator.get_page(page_number)
 
     # Проверка: есть ли QR-коды вообще
-    qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
     
-    #has_qr_codes = os.path.exists(qr_dir) and any(f for f in os.scandir(qr_dir) if f.name.endswith('.png'))
-    #has_qr_codes = False
-    #response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=S3_FOLDER)
-    #if "Contents" in response:
-    #    for obj in response["Contents"]:
-    #        # Игнорируем саму "папку" (например, qrcodes/)
-    #        if not obj["Key"].endswith("/"):
-    #            has_qr_codes = True
     
     has_qr_codes = Product.objects.exclude(qr_code_url__in=[None, '']).exists()
    
@@ -98,12 +86,12 @@ def product_list(request):
     
 
     # AJAX-запрос от infinite scroll
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        html = render_to_string('products/includes/product_rows.html', {'page_obj': page_obj})
-        return JsonResponse({
-            'html': html,
-            'has_next': page_obj.has_next()
-        })
+    #if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    #    html = render_to_string('products/includes/product_rows.html', {'page_obj': page_obj})
+    #    return JsonResponse({
+    #        'html': html,
+    #        'has_next': page_obj.has_next()
+    #    })
 
     # Рендер полной страницы
     return render(request, 'products/product_list.html', {
@@ -114,10 +102,8 @@ def product_list(request):
     })
 
 def redirect_by_barcode(request, barcode):
-    #print("Barcode:", barcode[1:])
     product = get_object_or_404(Product, barcode=barcode[1:])
-    #print(product.name)
-    return redirect(f"https://esschertdesign.com/qr/{product.name}")
+    return redirect(f"{os.getenv("REDERECT_URL")}{product.name}")
 
 def delete_all_qr(request):
     qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')  # или 'qr_codes', если используется такая папка
@@ -211,7 +197,6 @@ def generate_qr_old(request):
                     'created_at': date.today(),
                     'group': 'inriver',
                     'show_on_site': True,
-                    #'qr_code_url': f"https://esschertdesign-prod.s3.eu-west-1.amazonaws.com/qrcodes/{product.name}.png",
                     'qr_code_url': f"{os.getenv("AWS_URL")}{product.name}.png",
                     'qr_image_url': extract_qr_data_from_image(product.name),
                     
@@ -221,12 +206,7 @@ def generate_qr_old(request):
 
                 file_paths.append((product.id, filename))
 
-        # Возвращаем HTML с кнопками скачивания
-        #product_filter = ProductFilter(request.GET, queryset=Product.objects.all().order_by('-name'))
-        
-        #paginator = Paginator(product_filter.qs, 20)  # 20 товаров на страницу
-        #page_number = request.GET.get('page')
-        #page_obj = paginator.get_page(page_number)
+  
         
         return redirect('product_list')
 
@@ -452,7 +432,7 @@ def update_products_from_inriver(request):
                     'created_at': date.today(),
                     'group': 'inriver',
                     'show_on_site': True,
-                    'product_url' : f"https://www.esschertdesign.com/qr/{product_name}",
+                    'product_url' : f"{os.getenv("REDERECT_URL")}{product_name}",
                     'product_image_url' : f"https://dhznjqezv3l9q.cloudfront.net/report_Image/normal/{product_name}_01.png"
                     }
                 )

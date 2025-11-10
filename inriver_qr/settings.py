@@ -27,34 +27,42 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag')
-#SECRET_KEY = os.environ.get('SECRET_KEY')
-
+BASE_API_URL = os.getenv("BASE_API_URL", None)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True#bool(os.environ.get('DJANGO_DEBUG',  False))
+DEBUG = bool(os.getenv('DJANGO_DEBUG',  False))
+SECURE_SSL_REDIRECT =  os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+CSRF_COOKIE_SECURE =  os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
 
 
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 SESSION_COOKIE_AGE = 1800
 
+#print(type(DEBUG), type(SECURE_SSL_REDIRECT), type(CSRF_COOKIE_SECURE), type(SESSION_COOKIE_SECURE))
 
-ALLOWED_HOSTS = ['*','51.20.78.106','tikhonovskyi.com','www.tikhonovskyi.com', '127.0.0.1', ]
+#print("DEBUG =", DEBUG, "SECURE_SSL_REDIRECT =", SECURE_SSL_REDIRECT, "CSRF_COOKIE_SECURE =", CSRF_COOKIE_SECURE, "SESSION_COOKIE_SECURE =", SESSION_COOKIE_SECURE)
 
-CSRF_TRUSTED_ORIGINS = ['http://.*', 
-                        'https://.*',
-'https://tikhonovskyi.com',
 
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS',  '*').split(',')
+
+ALLOWED_HOSTS = ALLOWED_HOSTS + ['51.20.78.106','tikhonovskyi.com','www.tikhonovskyi.com' ]
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',
+                        'http://localhost:8000',
+                        
+                        'https://tikhonovskyi.com',
                         'https://tikhonovskyi.com/',
-                        'http://0.0.0.0:8000',
                         'http://51.20.78.106',
                         'https://51.20.78.106',
                         
                         ]
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
 # Application definition
 
 INSTALLED_APPS = [
@@ -126,6 +134,7 @@ REST_FRAMEWORK = {
 }
 
 SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {
         'Token': {
             'type': 'apiKey',
@@ -190,7 +199,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    " https://inriverqr-63c10a36ae10.herokuapp.com"
+    "https://inriverqr-63c10a36ae10.herokuapp.com"
 ]
 
 # Для разработки можешь временно разрешить всё:

@@ -44,7 +44,7 @@ class MyEndpoint(APIView):
 
 @csrf_exempt
 @swagger_auto_schema(
-    manual_parameters=[token_param],
+    #manual_parameters=[token_param],
     method='post',
     request_body=GenerateQRInputSerializer,
     operation_description="Generating QR codes for selected products",
@@ -112,4 +112,62 @@ def generate_qr_api(request):
         "files": generated_files
     })
 
+@csrf_exempt
+@swagger_auto_schema(
+    method='get',
+    
+    operation_description="Получить список всех сгенерированных QR-кодов из S3.",
+    responses={
+        200: openapi.Response(
+            description="Успешный ответ со списком QR-кодов",
+            examples={
+                "application/json": {
+                    "qr_codes": [
+                        {
+                            "filename": "product_1.png",
+                            "url": "https://example-bucket.s3.amazonaws.com/qrcodes/product_1.png?..."
+                        },
+                        {
+                            "filename": "product_2.png",
+                            "url": "https://example-bucket.s3.amazonaws.com/qrcodes/product_2.png?..."
+                        }
+                    ]
+                }
+            }
+        ),
+        401: "Неавторизовано — отсутствует или неверный токен",
+        500: "Ошибка при доступе к S3"
+    }
+)
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_all_generated_qr_codes(request):
+    """
+    Возвращает список всех сгенерированных QR-кодов, 
+    загруженных в S3. Для доступа требуется токен авторизации.
+    """
+    folder = "qrcodes"
+    qr_codes = []
 
+    try:
+        response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=S3_FOLDER)
+        for obj in response.get('Contents', []):
+            key = obj['Key']
+            filename = os.path.basename(key)
+
+            # Генерируем временную ссылку (presigned URL)
+            presigned_url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': BUCKET_NAME, 'Key': key},
+                ExpiresIn=3600  # ссылка действует 1 час
+            )
+
+            qr_codes.append({
+                "filename": filename,
+                "url": presigned_url
+            })
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+    return Response({"qr_codes": qr_codes}, status=200)

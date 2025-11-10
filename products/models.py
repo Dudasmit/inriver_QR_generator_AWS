@@ -19,34 +19,7 @@ class Product(models.Model):
     product_image_url = models.URLField(blank=True, null=True)
     
     
-    '''
-    @property
-    def product_url(self):
-        return f"https://www.esschertdesign.com/qr/{self.name}"
-    
-    @property
-    def product_image_url(self):
-        return f"https://dhznjqezv3l9q.cloudfront.net/report_Image/normal/{quote(self.name)}_01.png"
-    
-    @property
-    def product_barcode_image_url(self):
-        return f"https://esschertdesign-prod.s3.eu-west-1.amazonaws.com/qrcodes/{quote(self.name)}.png"
-
-    
-    @property
-    def barcode_png_url(self):
-        
-        if check_url_exists(f"https://esschertdesign-prod.s3.eu-west-1.amazonaws.com/qrcodes/{self.name}.png"):
-            return f"https://esschertdesign-prod.s3.eu-west-1.amazonaws.com/qrcodes/{self.name}.png"
-        
-        return None
-
-    @property
-    def qr_code_link(self):
-      
-        return extract_qr_data_from_image(self.name)
-    '''
-
+   
 
 
 

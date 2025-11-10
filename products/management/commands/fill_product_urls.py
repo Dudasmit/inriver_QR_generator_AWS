@@ -13,7 +13,7 @@ class Command(BaseCommand):
         updated = 0
 
         for obj in objects:
-            obj.product_url = f"https://www.esschertdesign.com/qr/{obj.name}"
+            obj.product_url = f"{os.getenv("REDERECT_URL")}{obj.name}"
             obj.product_image_url = (
                 f"https://dhznjqezv3l9q.cloudfront.net/report_Image/normal/{quote(obj.name)}_01.png"
             )

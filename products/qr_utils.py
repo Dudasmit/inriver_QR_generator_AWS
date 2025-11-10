@@ -51,9 +51,9 @@ def remove_transparency(im, bg_color=(255, 255, 255)):
 
 
 def create_and_save_qr_code_eps(s3,url, item, GTIN, include_barcode, folder):
-    data_url = "https://www.esschertdesign.com/qr/" + item
+    data_url = os.getenv("REDERECT_URL") + item
     
-    bucket_name = os.getenv("BUCKET_NAME")#"esschertdesign-prod"
+    bucket_name = os.getenv("BUCKET_NAME") #"esschertdesign-prod"
     print("Создание QR для: ", bucket_name)
     
     if not check_url_exists(data_url):

@@ -36,6 +36,7 @@ urlpatterns = [
 
     
     path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico'))),
+    
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     
     
