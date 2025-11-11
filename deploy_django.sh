@@ -6,8 +6,8 @@
 # ----------- Настройки проекта ------------
 PROJECT_NAME="inriver_QR_generator_AWS"
 PROJECT_DIR="/home/ubuntu/$PROJECT_NAME"
-GIT_REPO="git@github.com:username/inriver_QR_generator_AWS.git"
-DJANGO_USER="django"
+GIT_REPO="git@github.com:Dudasmit/inriver_QR_generator_AWS.git"
+DJANGO_USER="ubuntu"
 DOMAIN="tikhonovskyi.com"
 PYTHON_VERSION="3.11"
 wsgiPROJECT_NAME="inriver_qr"
