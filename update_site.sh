@@ -5,7 +5,7 @@
 
 # ----------- Настройки проекта ------------
 PROJECT_NAME="inriver_QR_generator_AWS"
-PROJECT_DIR="/home/django/$PROJECT_NAME"
+PROJECT_DIR="/home/ubuntu/$PROJECT_NAME"
 DJANGO_USER="django"
 BRANCH="main"
 
