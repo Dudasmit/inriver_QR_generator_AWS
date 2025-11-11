@@ -50,16 +50,17 @@ def remove_transparency(im, bg_color=(255, 255, 255)):
 
 
 
-def create_and_save_qr_code_eps(s3,url, item, GTIN, include_barcode, folder):
-    data_url = os.getenv("REDERECT_URL") + item
-    
-    bucket_name = os.getenv("BUCKET_NAME") #"esschertdesign-prod"
-    #print("Создание QR для: ", bucket_name)
-    
+def create_and_save_qr_code_eps(s3, url, item, GTIN, include_barcode, folder):
+    # Формируем URL для QR
+    data_url = (os.getenv("REDIRECT_URL") or "") + str(item)
+    bucket_name = os.getenv("BUCKET_NAME")
+
     if not check_url_exists(data_url):
-        print("Ссылка не существует: ", data_url)
+        print("Ссылка не существует:", data_url)
 
     data = url + str(GTIN)
+    
+    # Создаем QR-код
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -68,39 +69,40 @@ def create_and_save_qr_code_eps(s3,url, item, GTIN, include_barcode, folder):
     )
     qr.add_data(data)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
 
-    png_path = os.path.join(settings.MEDIA_ROOT, folder, f"{item}.png")
+    # --- PNG ---
     try:
-        img.save(png_path)
-        s3.upload_file(png_path, bucket_name, os.path.join(folder, f"{item}.png"),ExtraArgs={'ACL': 'public-read'})
+        png_buffer = BytesIO()
+        img.save(png_buffer, format="PNG")
+        png_buffer.seek(0)
+
+        s3.upload_fileobj(
+            png_buffer,
+            bucket_name,
+            os.path.join(folder, f"{item}.png"),
+            ExtraArgs={'ACL': 'public-read'}
+        )
     except Exception as e:
         print("PNG upload error:", e)
         return False
-    
 
-
+    # --- EPS ---
     try:
-        fig = Image.open(png_path)
-        if fig.mode in ('RGBA', 'LA'):
-            fig = remove_transparency(fig)
-            fig = fig.convert('RGB')
-        fig = remove_transparency(fig)
-        fig = fig.convert('RGB')
+        eps_buffer = BytesIO()
+        img.save(eps_buffer, format="EPS")
+        eps_buffer.seek(0)
 
-        eps_path = os.path.join(settings.MEDIA_ROOT, folder, f"{item}.eps")
-        
-        fig.save(eps_path)
-        s3.upload_file(eps_path, bucket_name, os.path.join(folder, f"{item}.eps"),ExtraArgs={'ACL': 'public-read'})
-        fig.close()
+        s3.upload_fileobj(
+            eps_buffer,
+            bucket_name,
+            os.path.join(folder, f"{item}.eps"),
+            ExtraArgs={'ACL': 'public-read'}
+        )
     except Exception as e:
         print("EPS upload error:", e)
         return False
-    
-    
 
-    
-    
     return {
         "png": f"https://{bucket_name}.s3.amazonaws.com/{folder}{item}.png",
         "eps": f"https://{bucket_name}.s3.amazonaws.com/{folder}{item}.eps"
