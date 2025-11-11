@@ -106,14 +106,14 @@ def redirect_by_barcode(request, barcode):
     return redirect(f"{os.getenv("REDIRECT_URL")}{product.name}")
 
 def delete_all_qr(request):
-    qr_dir = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)  # или 'qr_codes', если используется такая папка
+    #qr_dir = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)  # или 'qr_codes', если используется такая папка
 
-    if os.path.exists(qr_dir):
-        shutil.rmtree(qr_dir)
-        os.makedirs(qr_dir)  # Создаём заново пустую папку, если нужно
-        messages.success(request, "All QR codes have been successfully removed.")
-    else:
-        messages.info(request, "No files were found for deletion.")
+    #if os.path.exists(qr_dir):
+    #    shutil.rmtree(qr_dir)
+    #    os.makedirs(qr_dir)  # Создаём заново пустую папку, если нужно
+    #    messages.success(request, "All QR codes have been successfully removed.")
+    #else:
+    #    messages.info(request, "No files were found for deletion.")
         
         
     response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=S3_FOLDER)
@@ -169,8 +169,8 @@ def generate_qr(request):
             products = Product.objects.filter(id__in=selected_ids)
             
         file_paths = []
-        qr_root = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)
-        os.makedirs(qr_root, exist_ok=True)
+        #qr_root = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)
+        #os.makedirs(qr_root, exist_ok=True)
         
         count = 0  # ← счётчик  файлов
        
