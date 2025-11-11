@@ -31,6 +31,7 @@ BASE_API_URL = os.getenv("BASE_API_URL", None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1', 'yes')
+
 SECURE_SSL_REDIRECT =  os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 CSRF_COOKIE_SECURE =  os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
 SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
@@ -58,6 +59,7 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',
                         
                         ]
 if not DEBUG:
+    print("Production settings applied.")
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
 # Application definition

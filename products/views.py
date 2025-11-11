@@ -80,7 +80,7 @@ def product_list(request):
     # Проверка: есть ли QR-коды вообще
     
     
-    has_qr_codes = Product.objects.exclude(qr_code_url__in=[None, '']).exists()
+    has_qr_codes = queryset.filter(qr_image_url__isnull= False).exists()
    
     
     
@@ -103,7 +103,7 @@ def product_list(request):
 
 def redirect_by_barcode(request, barcode):
     product = get_object_or_404(Product, barcode=barcode[1:])
-    return redirect(f"{os.getenv("REDIRECT_URL")}{product.name}")
+    return redirect(f"{os.getenv("QR_REDIRECT_URL")}{product.name}")
 
 def delete_all_qr(request):
     #qr_dir = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)  # или 'qr_codes', если используется такая папка
@@ -120,7 +120,7 @@ def delete_all_qr(request):
 
     if "Contents" not in response:
         messages.info(request, "No QR codes were found for deletion.")
-        return
+        return redirect('product_list')
 
     # Формируем список ключей для удаления
     objects_to_delete = [
@@ -131,7 +131,7 @@ def delete_all_qr(request):
 
     if not objects_to_delete:
         messages.info(request, "No QR codes were found for deletion.")
-        return
+        return redirect('product_list')
 
     # Удаляем все объекты
     s3.delete_objects(
@@ -409,7 +409,7 @@ def update_products_from_inriver(request):
                     'created_at': date.today(),
                     'group': 'inriver',
                     'show_on_site': True,
-                    'product_url' : f"{os.getenv("REDIRECT_URL")}{product_name}",
+                    'product_url' : f"{os.getenv("QR_REDIRECT_URL")}{product_name}",
                     'product_image_url' : f"https://dhznjqezv3l9q.cloudfront.net/report_Image/normal/{product_name}_01.png"
                     }
                 )
