@@ -103,7 +103,7 @@ def product_list(request):
 
 def redirect_by_barcode(request, barcode):
     product = get_object_or_404(Product, barcode=barcode[1:])
-    return redirect(f"{os.getenv("REDERECT_URL")}{product.name}")
+    return redirect(f"{os.getenv("REDIRECT_URL")}{product.name}")
 
 def delete_all_qr(request):
     qr_dir = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)  # или 'qr_codes', если используется такая папка
@@ -409,7 +409,7 @@ def update_products_from_inriver(request):
                     'created_at': date.today(),
                     'group': 'inriver',
                     'show_on_site': True,
-                    'product_url' : f"{os.getenv("REDERECT_URL")}{product_name}",
+                    'product_url' : f"{os.getenv("REDIRECT_URL")}{product_name}",
                     'product_image_url' : f"https://dhznjqezv3l9q.cloudfront.net/report_Image/normal/{product_name}_01.png"
                     }
                 )
