@@ -106,7 +106,7 @@ def redirect_by_barcode(request, barcode):
     return redirect(f"{os.getenv("REDERECT_URL")}{product.name}")
 
 def delete_all_qr(request):
-    qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')  # или 'qr_codes', если используется такая папка
+    qr_dir = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)  # или 'qr_codes', если используется такая папка
 
     if os.path.exists(qr_dir):
         shutil.rmtree(qr_dir)
@@ -147,7 +147,7 @@ def delete_all_qr(request):
 
 
 @csrf_exempt
-def generate_qr_old(request):
+def generate_qr(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('products')
         
@@ -169,7 +169,7 @@ def generate_qr_old(request):
             products = Product.objects.filter(id__in=selected_ids)
             
         file_paths = []
-        qr_root = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
+        qr_root = os.path.join(settings.MEDIA_ROOT, S3_FOLDER)
         os.makedirs(qr_root, exist_ok=True)
         
         count = 0  # ← счётчик  файлов
@@ -187,11 +187,14 @@ def generate_qr_old(request):
             
             
             
-            if create_and_save_qr_code_eps(s3,f"https://{domain}/01/0", product.name, product.barcode, include_barcode, "qrcodes"):
+            result = create_and_save_qr_code_eps(s3,f"https://{domain}/01/0", product.name, product.barcode, include_barcode, S3_FOLDER)
+            if not isinstance(result, dict):
+                continue
+         
                 
-                product, created = Product.objects.update_or_create(
-                external_id=product.external_id,
-                defaults={
+            product, created = Product.objects.update_or_create(
+            external_id=product.external_id,
+            defaults={
                     'name': product.name,
                     'barcode': product.barcode,
                     'created_at': date.today(),
@@ -204,7 +207,7 @@ def generate_qr_old(request):
                     }
                 )
 
-                file_paths.append((product.id, filename))
+            file_paths.append((product.id, filename))
 
   
         
@@ -213,24 +216,7 @@ def generate_qr_old(request):
     return HttpResponse("Метод не поддерживается", status=405)
 
 
-    
-    product = get_object_or_404(Product, id=product_id)
-    base_path = f'media/qrcodes/'
-    
-    png_path = os.path.join(base_path, f"{product.name}.png")
-    eps_path = os.path.join(base_path, f"{product.name}.eps")
-
-    if not os.path.exists(png_path) or not os.path.exists(eps_path):
-        return HttpResponse("No QR codes found for this product.", status=404)
-
-    buffer = BytesIO()
-    with ZipFile(buffer, 'w') as zip_file:
-        zip_file.write(png_path, arcname=f"{product.name}.png")
-        zip_file.write(eps_path, arcname=f"{product.name}.eps")
-
-    buffer.seek(0)
-    response = FileResponse(buffer, as_attachment=True, filename=f"{product.name}_qr.zip")
-    return response
+  
 
 
 
@@ -324,16 +310,7 @@ def download_all_qr(request):
 
 
     
-    zip_buffer = BytesIO()
-    with ZipFile(zip_buffer, 'w') as zipf:
-        for fname in os.listdir(os.path.join(settings.MEDIA_ROOT, 'qrcodes')):
-            fpath = os.path.join(settings.MEDIA_ROOT, 'qrcodes', fname)
-            zipf.write(fpath, arcname=fname)
-    zip_buffer.seek(0)
-    
-    return HttpResponse(zip_buffer, content_type='application/zip', headers={
-        'Content-Disposition': 'attachment; filename="qr_codes.zip"',
-    })
+   
 
 def check_url_exists(url):
     try:
@@ -446,21 +423,5 @@ def update_products_from_inriver(request):
         f"The update has been finalized: {created_count} added, {updated_count} updated, {skipped_count} missing (duplicates)."
     )
     return redirect('product_list')
-
-def barcode_image_view(request, name):
-    
-    
-    #qr_data = request.build_absolute_uri(f"/01/{barcode}")
-    #img = qrcode.make(qr_data)
-    buffer = BytesIO()
-    
-    path = f"qrcodes/{name}.png"
-    full_path = os.path.join(settings.MEDIA_ROOT, path)
-    if os.path.exists(full_path):
-        fig = Image.open(full_path)
-        fig.save(buffer, format="PNG")
-        return HttpResponse(buffer.getvalue(), content_type="image/png")
-
-
 
 

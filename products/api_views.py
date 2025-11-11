@@ -20,7 +20,7 @@ import boto3
 
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 S3_FOLDER = os.getenv("S3_FOLDER")
-
+AWS_URL = os.getenv("AWS_URL")
 s3 = boto3.client("s3")
 
 
@@ -75,47 +75,63 @@ def generate_qr_api(request):
     else:
         products = Product.objects.filter(name__in=product_ids)
 
-    folder = "qrcodes"
-    os.makedirs(os.path.join(settings.MEDIA_ROOT, folder), exist_ok=True)
+    os.makedirs(os.path.join(settings.MEDIA_ROOT, S3_FOLDER), exist_ok=True)
 
-    success_count = 0
-    generated_files = []
 
+    generated_products = []
     for product in products:
         url = f"https://{domain}/01/0"
-        success = create_and_save_qr_code_eps(s3,url, product.name, product.barcode, include_barcode, folder)
+        result = create_and_save_qr_code_eps(s3,url, product.name, product.barcode, include_barcode, S3_FOLDER)
 
-        if success:
-            success_count += 1
-            filename = f"{product.name.replace(' ', '_')}.png"
-            file_path = os.path.join(settings.MEDIA_ROOT, folder, filename)
+        if not isinstance(result, dict):
+            continue
 
-            # Чтение PNG-файла и кодирование в base64
+        product_files = []
+
+        for file_type, file_url in result.items():
+            filename = f"{product.name}.{file_type}"
+            local_path = os.path.join(settings.MEDIA_ROOT, S3_FOLDER, filename)
+
             try:
-                with open(file_path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                    generated_files.append({
-                        "product": product.name,
-                        "filename": filename,
-                        "image_base64": encoded_string
-                    })
+                with open(local_path, "rb") as f:
+                    image_base64 = base64.b64encode(f.read()).decode("utf-8")
             except Exception as e:
-                generated_files.append({
-                    "product": product.name,
-                    "filename": filename,
-                    "error": f"Unable to read PNG file: {str(e)}"
-                })
+                image_base64 = None
+                print(f"Не удалось прочитать {local_path}: {e}")
+
+            product_files.append({
+                "filename": filename,
+                "file_type": file_type,
+                "url": file_url,
+                "image_base64": image_base64
+            })
+
+        generated_products.append({
+            "product": product.name,
+            "files": product_files
+        })
 
     return Response({
         "success": True,
-        "generated": success_count,
-        "files": generated_files
-    })
+        "generated": len(generated_products),
+        "files": generated_products
+    }, status=200)
+
+
+file_type_param = openapi.Parameter(
+    'file_type',
+    openapi.IN_QUERY,
+    description="Тип файла QR-кода: png или eps",
+    type=openapi.TYPE_STRING,
+    enum=['png', 'eps'],
+    required=False
+)
+
 
 @csrf_exempt
 @swagger_auto_schema(
     method='get',
-    
+    manual_parameters=[file_type_param],
     operation_description="Получить список всех сгенерированных QR-кодов из S3.",
     responses={
         200: openapi.Response(
@@ -146,26 +162,44 @@ def get_all_generated_qr_codes(request):
     """
     Возвращает список всех сгенерированных QR-кодов, 
     загруженных в S3. Для доступа требуется токен авторизации.
+    Можно фильтровать по типу файла: ?file_type=png или ?file_type=eps
     """
-    folder = "qrcodes"
     qr_codes = []
 
     try:
         response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=S3_FOLDER)
-        for obj in response.get('Contents', []):
-            key = obj['Key']
-            filename = os.path.basename(key)
+        
+        contents = response.get('Contents', [])
 
-            # Генерируем временную ссылку (presigned URL)
-            presigned_url = s3.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': BUCKET_NAME, 'Key': key},
-                ExpiresIn=3600  # ссылка действует 1 час
-            )
+        # ✅ фильтрация по расширению файла (если указано в query params)
+        file_type = request.query_params.get('file_type')
+        if file_type:
+            contents = [
+                obj for obj in contents
+                if obj['Key'].lower().endswith(f'.{file_type.lower()}')
+            ]
+
+        
+        for obj in contents:
+            key = obj['Key']
+         
+            filename = os.path.basename(key)
+            if key.endswith('/'):# or not key.lower().endswith('.png'):
+                continue
+
+          
+            file_url = f"https://{BUCKET_NAME}.s3.amazonaws.com/{key}"
+            try:
+                s3_object = s3.get_object(Bucket=BUCKET_NAME, Key=key)
+                image_content = s3_object['Body'].read()
+                image_base64 = base64.b64encode(image_content).decode('utf-8')
+            except Exception as e:
+                image_base64 = None
 
             qr_codes.append({
                 "filename": filename,
-                "url": presigned_url
+                "url": file_url,
+                "image_base64": image_base64
             })
     except Exception as e:
         return Response({"error": str(e)}, status=500)

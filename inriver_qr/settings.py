@@ -42,9 +42,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SESSION_COOKIE_AGE = 1800
 
-#print(type(DEBUG), type(SECURE_SSL_REDIRECT), type(CSRF_COOKIE_SECURE), type(SESSION_COOKIE_SECURE))
-
-#print("DEBUG =", DEBUG, "SECURE_SSL_REDIRECT =", SECURE_SSL_REDIRECT, "CSRF_COOKIE_SECURE =", CSRF_COOKIE_SECURE, "SESSION_COOKIE_SECURE =", SESSION_COOKIE_SECURE)
 
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS',  '*').split(',')
@@ -148,25 +145,7 @@ SWAGGER_SETTINGS = {
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '###',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-'''
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_HOST = os.getenv("DATABASE_HOST") 
 
@@ -204,7 +183,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://inriverqr-63c10a36ae10.herokuapp.com"
+    "https://tikhonovskyi.com"
 ]
 
 # Для разработки можешь временно разрешить всё:

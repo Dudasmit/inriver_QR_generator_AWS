@@ -54,7 +54,7 @@ def create_and_save_qr_code_eps(s3,url, item, GTIN, include_barcode, folder):
     data_url = os.getenv("REDERECT_URL") + item
     
     bucket_name = os.getenv("BUCKET_NAME") #"esschertdesign-prod"
-    print("Создание QR для: ", bucket_name)
+    #print("Создание QR для: ", bucket_name)
     
     if not check_url_exists(data_url):
         print("Ссылка не существует: ", data_url)
@@ -73,39 +73,35 @@ def create_and_save_qr_code_eps(s3,url, item, GTIN, include_barcode, folder):
     png_path = os.path.join(settings.MEDIA_ROOT, folder, f"{item}.png")
     try:
         img.save(png_path)
-    except Exception:
+        s3.upload_file(png_path, bucket_name, os.path.join(folder, f"{item}.png"),ExtraArgs={'ACL': 'public-read'})
+    except Exception as e:
+        print("PNG upload error:", e)
         return False
     
-    #try:
-    s3.upload_file(png_path, bucket_name, os.path.join("qrcodes/", f"{item}.png"),ExtraArgs={'ACL': 'public-read'})
-        #print('OK',os.path.join("qrcodes/", f"{item}.png"))
-    #except:
-    #    print("\033[1;31mQR code was not created\033[0m", png_path)
-
-        #return False
 
 
-    fig = Image.open(png_path)
-    if fig.mode in ('RGBA', 'LA'):
+    try:
+        fig = Image.open(png_path)
+        if fig.mode in ('RGBA', 'LA'):
+            fig = remove_transparency(fig)
+            fig = fig.convert('RGB')
         fig = remove_transparency(fig)
         fig = fig.convert('RGB')
-    fig = remove_transparency(fig)
-    fig = fig.convert('RGB')
 
-    eps_path = os.path.join(settings.MEDIA_ROOT, folder, f"{item}.eps")
-    try:
+        eps_path = os.path.join(settings.MEDIA_ROOT, folder, f"{item}.eps")
+        
         fig.save(eps_path)
-    except Exception:
+        s3.upload_file(eps_path, bucket_name, os.path.join(folder, f"{item}.eps"),ExtraArgs={'ACL': 'public-read'})
+        fig.close()
+    except Exception as e:
+        print("EPS upload error:", e)
         return False
-    fig.close()
     
-    try:
-        s3.upload_file(eps_path, bucket_name, os.path.join("qrcodes/", f"{item}.eps"),ExtraArgs={'ACL': 'public-read'})
-        #print('OK',os.path.join("qrcodes/", f"{item}.eps"))
-    except:
-        print("\033[1;31mQR code was not created\033[0m", eps_path)
+    
 
-        return False
     
     
-    return True
+    return {
+        "png": f"https://{bucket_name}.s3.amazonaws.com/{folder}{item}.png",
+        "eps": f"https://{bucket_name}.s3.amazonaws.com/{folder}{item}.eps"
+    }
