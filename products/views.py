@@ -32,7 +32,7 @@ from django.views.decorators.csrf import csrf_exempt
 import boto3
 
 TEMP_QR_DIR = os.path.join(tempfile.gettempdir(), 'qr_codes')
-os.makedirs(TEMP_QR_DIR, exist_ok=True)
+#os.makedirs(TEMP_QR_DIR, exist_ok=True)
 
 
 
