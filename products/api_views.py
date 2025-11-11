@@ -75,7 +75,7 @@ def generate_qr_api(request):
     else:
         products = Product.objects.filter(name__in=product_ids)
 
-    os.makedirs(os.path.join(settings.MEDIA_ROOT, S3_FOLDER), exist_ok=True)
+    #os.makedirs(os.path.join(settings.MEDIA_ROOT, S3_FOLDER), exist_ok=True)
 
 
     generated_products = []
@@ -90,20 +90,20 @@ def generate_qr_api(request):
 
         for file_type, file_url in result.items():
             filename = f"{product.name}.{file_type}"
-            local_path = os.path.join(settings.MEDIA_ROOT, S3_FOLDER, filename)
+            #local_path = os.path.join(settings.MEDIA_ROOT, S3_FOLDER, filename)
 
-            try:
-                with open(local_path, "rb") as f:
-                    image_base64 = base64.b64encode(f.read()).decode("utf-8")
-            except Exception as e:
-                image_base64 = None
-                print(f"Не удалось прочитать {local_path}: {e}")
+            #try:
+                #with open(local_path, "rb") as f:
+                    #image_base64 = base64.b64encode(f.read()).decode("utf-8")
+            #except Exception as e:
+                #image_base64 = None
+                #print(f"Не удалось прочитать {local_path}: {e}")
 
             product_files.append({
                 "filename": filename,
                 "file_type": file_type,
                 "url": file_url,
-                "image_base64": image_base64
+                #"image_base64": image_base64
             })
 
         generated_products.append({
