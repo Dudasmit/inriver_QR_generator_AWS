@@ -30,8 +30,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import boto3
+from .tasks import generate_qr_for_products
 
-TEMP_QR_DIR = os.path.join(tempfile.gettempdir(), 'qr_codes')
 
 
 
@@ -142,7 +142,30 @@ def delete_all_qr(request):
     
     return redirect('product_list')  # Возврат на главную
 
+@csrf_exempt
+def generate_qr_view(request):
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('products')
+        select_all = request.POST.get("select_all") == "1"
+        include_barcode = 'include_barcode' in request.POST
+        domain = request.POST.get('domain')
+        filter_data = request.session.get("last_filter", {})
 
+        if not selected_ids and not select_all:
+            return render(request, 'products/generate_qr.html', {'returntolist': True})
+        print("Starting QR generation task...")
+
+        # Запускаем Celery задачу асинхронно
+        generate_qr_for_products.delay(
+            product_ids=selected_ids,
+            select_all=select_all,
+            include_barcode=include_barcode,
+            domain=domain,
+            filter_data=filter_data
+        )
+
+        return redirect('product_list')
+    return HttpResponse("Метод не поддерживается", status=405)
 
 
 @csrf_exempt

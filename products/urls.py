@@ -4,7 +4,7 @@ from .views import product_list,  download_all_qr, update_products_from_inriver,
 from django.contrib.auth import views as auth_views
 
 from .api_views import generate_qr_api, MyEndpoint, get_all_generated_qr_codes
-from .views import redirect_by_barcode, custom_logout, generate_qr
+from .views import redirect_by_barcode, custom_logout, generate_qr,generate_qr_view
 
 urlpatterns = [
     
@@ -12,7 +12,7 @@ urlpatterns = [
     
     path('logout/', custom_logout, name='custom_logout'),
     path('accounts/profile/', product_list, name='product_list'),
-    path('generate_qr/', generate_qr, name='generate_qr'),
+    path('generate_qr/', generate_qr_view, name='generate_qr'),
     
     
     

@@ -153,7 +153,7 @@ DATABASE_HOST = os.getenv("DATABASE_HOST")
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': DATABASE_PASSWORD,
@@ -214,3 +214,11 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static').replace('\\', '/')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # адрес брокера
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"  # где хранить результаты
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
