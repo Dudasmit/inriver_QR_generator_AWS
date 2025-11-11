@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu
 BASE_API_URL = os.getenv("BASE_API_URL", None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv('DJANGO_DEBUG',  False))
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1', 'yes')
 SECURE_SSL_REDIRECT =  os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 CSRF_COOKIE_SECURE =  os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
 SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
@@ -39,7 +39,7 @@ SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'Tru
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
+USE_X_FORWARDED_HOST = True
 SESSION_COOKIE_AGE = 1800
 
 
@@ -57,8 +57,9 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',
                         'https://51.20.78.106',
                         
                         ]
-
+print("Debag flag - ", type(DEBUG))
 if not DEBUG:
+    print("Debag flag - ", DEBUG)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
 # Application definition
