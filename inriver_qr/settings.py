@@ -57,9 +57,7 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',
                         'https://51.20.78.106',
                         
                         ]
-print("Debag flag - ", type(DEBUG))
 if not DEBUG:
-    print("Debag flag - ", DEBUG)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
 # Application definition
@@ -188,7 +186,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Для разработки можешь временно разрешить всё:
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
