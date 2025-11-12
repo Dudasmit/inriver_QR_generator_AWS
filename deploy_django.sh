@@ -53,14 +53,7 @@ After=network.target
 User=$DJANGO_USER
 Group=www-data
 WorkingDirectory=$PROJECT_DIR
-Environment=DEBUG=False
-Environment=SECRET_KEY=<ваш секретный ключ>
-Environment=ALLOWED_HOSTS=$DOMAIN,www.$DOMAIN
-Environment=DB_NAME=postgres
-Environment=DB_USER=postgres
-Environment=DB_PASSWORD=<ваш пароль>
-Environment=DB_HOST=localhost
-Environment=DB_PORT=5432
+EnvironmentFile=$PROJECT_DIR/.env
 ExecStart=$PROJECT_DIR/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:$PROJECT_DIR/$PROJECT_NAME.sock $WSGI_MODULE
 
 [Install]
@@ -130,4 +123,6 @@ sudo ufw allow 'Nginx Full'
 sudo ufw --force enable
 
 echo "=========================================="
-echo "✅ Деплой завершён! Провер
+echo "✅ Деплой завершён! Проверьте сайт на https://$DOMAIN"
+echo "Celery worker запущен через systemd."
+echo "=========================================="
