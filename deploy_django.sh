@@ -66,6 +66,10 @@ sudo systemctl restart gunicorn
 
 # ----------- Celery worker systemd ------------
 echo "Настройка Celery worker..."
+
+sudo mkdir -p /var/log/celery
+sudo chown $DJANGO_USER:$DJANGO_USER /var/log/celery
+
 CELERY_SERVICE_FILE="/etc/systemd/system/celery.service"
 cat > $CELERY_SERVICE_FILE <<EOL
 [Unit]

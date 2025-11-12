@@ -15,6 +15,10 @@
     </button>
   </form>
 {% endif %}
+<div id="qr-status-bar" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+     width:50%; background:#ccc; height:20px; display:none; border-radius:10px; overflow:hidden;">
+    <div id="qr-status-fill" style="width:0%; height:100%; background:#5A7B47;"></div>
+</div>
 
      
   <a href="https://www.esschertdesign.com/en"
@@ -259,6 +263,65 @@
       }
     }
   
+const generateForm = document.getElementById("generateqgr-form");
+const generateButton = document.getElementById("generateqgr-button");
+const generateSpinner = document.getElementById("generateqgr-spinner");
+const statusBar = document.getElementById("qr-status-bar");
+const statusFill = document.getElementById("qr-status-fill");
+
+generateForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    generateButton.disabled = true;
+    generateSpinner.style.display = "inline-block";
+    generateButton.innerText = "QR codes are being generated...";
+    statusBar.style.display = "block";
+
+    const formData = new FormData(generateForm);
+
+    // Запускаем задачу через AJAX
+    const response = await fetch("{% url 'generate_qr' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+        }
+    });
+
+    if (!response.ok) {
+        alert("Ошибка при запуске задачи");
+        return;
+    }
+
+    const data = await response.json();
+    if (data.task_id) {
+        pollTaskStatus(data.task_id);
+    }
+});
+
+// Функция для опроса статуса задачи
+async function pollTaskStatus(taskId) {
+    try {
+        const response = await fetch(`/api/task-status/${taskId}/`);
+        if (!response.ok) throw new Error("Не удалось получить статус");
+
+        const data = await response.json();
+        const progress = Math.floor((data.processed / data.total) * 100);
+        statusFill.style.width = progress + "%";
+
+        if (!data.done) {
+            setTimeout(() => pollTaskStatus(taskId), 1000); 
+        } else {
+            statusFill.style.width = "100%";
+            generateButton.disabled = false;
+            generateSpinner.style.display = "none";
+            generateButton.innerText = "📎 Generate QR codes";
+            location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+        setTimeout(() => pollTaskStatus(taskId), 3000);
+    }
+}
 
     
 </script>

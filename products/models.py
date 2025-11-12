@@ -31,4 +31,10 @@ class QRTaskStatus(models.Model):
     done = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    @property
+    def progress(self):
+        if self.total == 0:
+            return 0
+        return int((self.processed / self.total) * 100)
+    
     

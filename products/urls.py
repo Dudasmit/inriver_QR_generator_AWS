@@ -4,7 +4,7 @@ from .views import product_list,  download_all_qr, update_products_from_inriver,
 from django.contrib.auth import views as auth_views
 
 from .api_views import generate_qr_api, MyEndpoint, get_all_generated_qr_codes
-from .views import redirect_by_barcode, custom_logout, generate_qr,generate_qr_view
+from .views import redirect_by_barcode, custom_logout, generate_qr,generate_qr_view, get_task_status
 
 urlpatterns = [
     
@@ -21,6 +21,7 @@ urlpatterns = [
     path('update-from-inriver/', update_products_from_inriver, name='update_from_inriver'),
     path('delete_all_qr/', delete_all_qr, name='delete_all_qr'),
     
+    path('api/task-status/<str:task_id>/', get_task_status, name='task_status'),
 
     
     

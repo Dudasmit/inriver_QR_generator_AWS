@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.shortcuts import redirect
-from .models import Product
+from .models import Product, QRTaskStatus
 from .filters import ProductFilter
 import qrcode
 import tempfile
@@ -156,15 +156,26 @@ def generate_qr_view(request):
         print("Starting QR generation task...")
 
         # Запускаем Celery задачу асинхронно
-        generate_qr_for_products.delay(
+        task = generate_qr_for_products.delay(
             product_ids=selected_ids,
             select_all=select_all,
             include_barcode=include_barcode,
             domain=domain,
             filter_data=filter_data
         )
+        print(f"🚀 Generating generate_qr_view", task.id)
 
-        return redirect('product_list')
+
+        QRTaskStatus.objects.create(
+            task_id=task.id,
+            total=len(selected_ids) if not select_all else 0, 
+            processed=0,
+            done=False,
+        )
+
+        # 🔹 Возвращаем task_id для фронта
+        return JsonResponse({'task_id': task.id})
+    
     return HttpResponse("Метод не поддерживается", status=405)
 
 
@@ -241,7 +252,7 @@ def generate_qr(request):
   
 
 
-
+@csrf_exempt
 def download_qr_zip(request, product_id):
     # 1️⃣ Получаем товар
     product = get_object_or_404(Product, id=product_id)
@@ -271,8 +282,7 @@ def download_qr_zip(request, product_id):
     response = FileResponse(buffer, as_attachment=True, filename=f"{product.name}_qr.zip")
     return response
 
-
-
+@csrf_exempt
 def download_all_qr(request):
     # Буфер для ZIP-файла
     zip_buffer = BytesIO()
@@ -331,6 +341,20 @@ def download_all_qr(request):
     return response
 
 
+
+@csrf_exempt
+def get_task_status(request, task_id):
+    try:
+        task = QRTaskStatus.objects.get(task_id=task_id)
+        return JsonResponse({
+            "task_id": task.task_id,
+            "total": task.total,
+            "processed": task.processed,
+            "done": task.done,
+            "progress": task.progress,
+        })
+    except QRTaskStatus.DoesNotExist:
+        return JsonResponse({"error": "Task not found"}, status=404)
     
    
 
